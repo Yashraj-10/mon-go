@@ -31,12 +31,15 @@ func main() {
 	}()
 
 	var itemStore *store.ItemStore
+	var objectMemberStore *store.ObjectMemberStore
 	if db != nil {
 		itemStore = store.NewItemStore(db)
+		objectMemberStore = store.NewObjectMemberStore(db)
 	}
 	itemHandler := &handler.ItemHandler{Store: itemStore}
+	objectMemberHandler := &handler.ObjectMemberHandler{Store: objectMemberStore}
 
-	srv := server.New(cfg.ServerPort, db, itemHandler)
+	srv := server.New(cfg.ServerPort, db, itemHandler, objectMemberHandler)
 
 	go func() {
 		log.Printf("server listening on :%d", cfg.ServerPort)

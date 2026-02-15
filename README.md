@@ -54,6 +54,8 @@ To run **only MongoDB** (e.g. for local development with `make run`): `make up-m
 - `POST/GET /items.list` – list items
 - `POST/GET /items.get` – get one item (query: `?id=...`)
 - `POST/GET /items.delete` – delete item (query: `?id=...`)
+- `POST/GET /object-members.create` – add object-member link (body or query: `object_id`, `member_id`; 409 if already linked). `object_id`: `group/[0-9]+`; `member_id`: `group/[0-9]+` or `user/[0-9]+`. Document `_id` is `object_id:member_id`.
+- `POST/GET /object-members.delete` – remove link by either `id` (`object_id:member_id`) or both `object_id` and `member_id`
 
 ## Makefile
 

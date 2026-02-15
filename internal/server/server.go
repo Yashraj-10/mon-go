@@ -36,8 +36,29 @@ func itemRoutes(h *handler.ItemHandler) []Route {
 	}
 }
 
+// objectMemberRoutes is the hardcoded table of object-members routes and their handlers.
+func objectMemberRoutes(h *handler.ObjectMemberHandler) []Route {
+	return []Route{
+		{"/object-members.create", http.MethodGet, h.Create},
+		{"/object-members.delete", http.MethodGet, h.Delete},
+	}
+}
+
+// registerRoutes registers all routes in the given slice (GET and/or POST per route).
+func registerRoutes(r chi.Router, routes []Route) {
+	for _, route := range routes {
+		switch route.Methods {
+		case http.MethodGet:
+			r.Get(route.Path, route.Handler)
+			r.Post(route.Path, route.Handler)
+		case http.MethodPost:
+			r.Post(route.Path, route.Handler)
+		}
+	}
+}
+
 // New builds the router and HTTP server. Call Run() to start listening.
-func New(port int, db *store.DB, itemHandler *handler.ItemHandler) *Server {
+func New(port int, db *store.DB, itemHandler *handler.ItemHandler, objectMemberHandler *handler.ObjectMemberHandler) *Server {
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID, middleware.RealIP, middleware.Logger, middleware.Recoverer)
 
@@ -51,15 +72,8 @@ func New(port int, db *store.DB, itemHandler *handler.ItemHandler) *Server {
 		_, _ = w.Write([]byte("Hello World"))
 	})
 
-	for _, route := range itemRoutes(itemHandler) {
-		switch route.Methods {
-		case http.MethodGet:
-			r.Get(route.Path, route.Handler)
-			r.Post(route.Path, route.Handler)
-		case http.MethodPost:
-			r.Post(route.Path, route.Handler)
-		}
-	}
+	registerRoutes(r, itemRoutes(itemHandler))
+	registerRoutes(r, objectMemberRoutes(objectMemberHandler))
 
 	return &Server{
 		httpServer: &http.Server{
