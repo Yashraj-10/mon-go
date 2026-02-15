@@ -1,0 +1,6 @@
+# Local config for running the server with: go run ./cmd/server
+# Env vars (MONGO_URI, MONGO_DB, SERVER_PORT, PORT) override these values.
+
+mongo_uri: "mongodb://localhost:27017"
+mongo_db: "mon_go"
+server_port: 8080

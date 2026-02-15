@@ -1,0 +1,35 @@
+---
+description: Conventions and layout for the mon-go (Mongo + Go) project
+alwaysApply: true
+---
+
+# mon-go project conventions
+
+## Layout
+
+- **cmd/server** – main entry; wires config, DB, handlers, server.
+- **internal/config** – Viper; config from `configs/config.yaml` (AddConfigPath + SetConfigName), no env overrides.
+- **internal/model** – domain types (BSON/JSON tags).
+- **internal/store** – MongoDB connection and repository-style access (e.g. ItemStore).
+- **internal/handler** – HTTP handlers; use `requireStore(w)` when handler depends on DB (return 503 if Store is nil).
+- **internal/server** – Chi router; routes defined in a Route table (Path, Methods, Handler). Methods: `http.MethodGet` (register GET+POST) or `http.MethodPost` (POST only).
+
+## Config
+
+- Config dir: **configs/** (file `configs/config.yaml`). Repo root for app is working directory; in Docker, config is mounted at `/app/configs/config.yaml`.
+- Use `http.MethodGet` / `http.MethodPost` from `net/http` for route method constants.
+
+## Routes and handlers
+
+- Item routes use dot names: **items.create**, **items.get**, **items.list**, **items.delete** (paths: `/items.create`, etc.). ID for get/delete via query param `?id=`.
+- Handlers may receive nil Store when Mongo is unavailable; always check with `requireStore(w)` and return 503 JSON when store is nil.
+
+## Build and Docker
+
+- Build output: **_build/server** (not bin/). _build/ is in .gitignore and .dockerignore.
+- Docker Compose: **mon-go** profile (app + mongo), **mongo** profile (mongo only). Makefile targets use `--profile` accordingly.
+
+## Commit messages
+
+- Use one of: **feat**, **refactor**, **chore**, **fix** (e.g. `feat: add ping endpoint`, `fix: handle nil store`).
+- Keep the subject short (one line, under ~72 chars).

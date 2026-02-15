@@ -1,0 +1,38 @@
+services:
+  mongo:
+    image: mongo:7
+    profiles:
+      - mon-go
+      - mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    profiles:
+      - mon-go
+    ports:
+      - "8080:8080"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    configs:
+      - source: app_config
+        target: /app/configs/config.yaml
+
+configs:
+  app_config:
+    content: |
+      mongo_uri: "mongodb://mongo:27017"
+      mongo_db: "mon_go"
+      server_port: 8080
+
+volumes:
+  mongo_data:
